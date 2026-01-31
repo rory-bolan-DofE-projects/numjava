@@ -1,54 +1,222 @@
 package app.belgarion.dofe;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 
 public class NumJavaArray {
-    private float[] itemList;
-    public NumJavaArray(float[] items) {
-        this.itemList = items;
+    public int ndim;
+    public int[] shape;
+    public int size;
+    // I am aware of how primitive this is but unless we want 3 separate classes this will have to do
+    private float[] array1D = null; // MAY BE NULL
+    private float[][] array2D = null; // MAY BE NULL
+    private float[][][] array3D = null; // MAY BE NULL
+
+    private NumJavaArray(float[] items){
+        this.ndim = 1;
+        this.array1D = items;
+        this.shape = new int[]{items.length};
+        this.size = items.length;
     }
-    public float[] getArray() {
-        return this.itemList;
-    }
-    public static class DivisionByZeroException extends RuntimeException {
-        public DivisionByZeroException(String message) {
-            super(message);
+    private NumJavaArray(float[][] items) {
+        this.ndim = 2;
+        this.array2D = items;
+        this.shape = new int[]{items.length, items[0].length};
+        this.size = 0;
+
+        int len = -1;
+        for (float[] arr : items) {
+            size+=arr.length;
+            if (len == -1) {
+                len = arr.length;
+                continue;
+            }
+            if (arr.length != len) throw new IllegalArgumentException("all rows of a matrix must be of equal length");
         }
     }
+    private NumJavaArray(float[][][] items) {
+        this.ndim = 3;
+        this.array3D = items;
+        this.shape = new int[]{items.length, items[0].length, items[0][0].length};
+        this.size = 0;
 
-    public float[] reverse() {
-        float[] result = new float[itemList.length];
-        int j = 0;
-        for (int i = itemList.length - 1; i >= 0; i--) {
-            result[j++] = itemList[i];
+        int len = -1;
+        for (float[][] arr2d : items) {
+            for (float[] arr : arr2d) {
+                if (len == -1) {
+                    len = arr.length;
+                }
+                if (arr.length != len)
+                    throw new IllegalArgumentException("all rows of a matrix must be of equal length");
+
+                size += arr.length;
+
+            }
         }
-        return result;
+    }
+    public static NumJavaArray createArray(float[] items) {
+        return new NumJavaArray(items);
+    }
+    public static NumJavaArray createArray(float[][] items) {
+        return new NumJavaArray(items);
+    }
+    public static NumJavaArray createArray(float[][][] items) {
+        return new NumJavaArray(items);
+    }
+    public static NumJavaArray zeros(int... params) {
+        if (params.length == 1) {
+            float[] items = new float[params[0]];
+            for (int i = 0; i < params[0]; i++) {
+                items[i] = 0;
+            }
+            return new NumJavaArray(items);
+        } else if (params.length == 2) {
+            float[][] items = new float[params[0]][params[1]];
+            for (int i = 0; i < params[0]; i++) {
+                for (int j = 0; j < params[1]; j++) {
+                    items[i][j] = 0;
+                }
+            }
+            return new NumJavaArray(items);
+        } else {
+            float[][][] items = new float[params[0]][params[1]][params[2]];
+            for (int i = 0; i < params[0]; i++) {
+                for (int j = 0; j < params[1]; j++) {
+                    for (int k = 0; k < params[2]; k++) {
+                        items[i][j][k] = 0;
+                    }
+                }
+            }
+            return new NumJavaArray(items);
+        }
+    }
+    public String toString() {
+        return switch (ndim) {
+            case 1 -> Arrays.toString(array1D);
+            case 2 -> this.deepToString(array2D);
+            case 3 -> deeperToString(array3D);
+            default -> throw new IllegalStateException("Unexpected value: " + ndim);
+        };
+    }
+    private String deepToString(float[][] items) {
+        StringBuilder builder = new StringBuilder();
+        builder.append('[');
+        for (float[] arr : items) {
+            builder.append(Arrays.toString(arr));
+            builder.append(',');
+        }
+        builder.delete(builder.length()-1, builder.length());
+        builder.append(']');
+        return builder.toString();
+    }
+    private String deeperToString(float[][][] items) {
+        StringBuilder builder = new StringBuilder();
+        builder.append('[');
+
+        for (float[][] arr : items) {
+
+            builder.append(deepToString(arr));
+
+            builder.append(',');
+
+        }
+        builder.append(']');
+        builder.delete(builder.length()-2, builder.length()-1);
+        return builder.toString();
+    }
+    private float[] reverse(float[] arr) {
+        float[] list = new float[arr.length];
+        for (int i = arr.length - 1; i >= 0; i--) {
+            list[arr.length-i - 1] = arr[i];
+        }
+        return list;
+    }
+    private float[][] reverse(float[][] arr) {
+        float[][] list = new float[arr.length][arr[0].length];
+        for (int i = arr.length - 1; i >= 0; i--) {
+            list[arr.length-i - 1] = arr[i];
+        }
+        return list;
+    }
+    private float[][][] reverse(float[][][] arr) {
+        float[][][] list = new float[arr.length][arr[0].length][arr[0][0].length];
+        for (int i = arr.length - 1; i >= 0; i--) {
+            list[arr.length-i - 1] = arr[i];
+        }
+        return list;
     }
 
+    public NumJavaArray reversed() {
+
+        if (ndim == 1) {
+            return new NumJavaArray(reverse(array1D));
+        } else if (ndim == 2) {
+            float[][] items = new float[array2D.length][array2D[0].length];
+            for (int i = 0; i < array2D.length; i++) {
+                items[i] = reverse(array2D[i]);
+
+            }
+            return new NumJavaArray(reverse(items));
+        } else if (ndim == 3) {
+            float[][][] items = new float[array3D.length][array3D[0].length][array3D[0][0].length];
+//            items = reverse(array3D);
+            // [[[1,2,3],[4,5,6]],[[7,8,9],[10,11,12]]]
+            for (int i = 0; i < array3D.length; i++) {
+                float[][] arr2d = array3D[i];
+                items[i] = reverse(arr2d);
+            }
+            items = reverse(items);
+            for (int i = 0; i < items.length; i++) {
+
+                for (int j = 0; j < items[i].length; j++) {
+                    items[i][j] = reverse(items[i][j]);
+
+                }
+
+            }
+            return new NumJavaArray(items);
+        }
+        return null;
+    }
+    public float get(int... indices) {
+        if (ndim != indices.length) throw new IllegalArgumentException("incorrect number of indices");
+        if (ndim == 1) {
+            return array1D[indices[0]];
+        } else if (ndim == 2) {
+            return array2D[indices[0]][indices[1]];
+        } else {
+            return array3D[indices[0]][indices[1]][indices[2]];
+        }
+    }
     public float average() {
         float total = 0;
-        for (float num : itemList) {
-            total+=num;
-        }
-        int arrayLength = itemList.length;
-        if (arrayLength != 0) {
-            return total/arrayLength;
-        } else {
-            return 0;
-        }
+        if (ndim==1) {
+            for (float v : array1D) {
+                total += v;
+            }
+            return total/(float) array1D.length;
+        } else if (ndim == 2) {
+            int amountofNumbers = 0;
+            for (float[] floats : array2D) {
+                for (float aFloat : floats) {
+                    total += aFloat;
+                    amountofNumbers++;
+                }
 
-    }
-    public float get(int index) {
-        return itemList[index];
-    }
-    public float[] get(int lower, int upper) {
-        float[] items = new float[upper-(lower-1)];
-        // if lower is 5 and upper is 10 we do 6 loops to get elements 5,6,7,8,9,10
-        int index = 0;
-        for (int i = lower; i <=upper; i++) {
-            items[index] = itemList[i];
-            index++;
+            }
+            return total/(float) amountofNumbers;
+        } else if (ndim == 3) {
+            int amountofNumbers = 0;
+            for (float[][] floats : array3D) {
+                for (float[] aFloat : floats) {
+                    for (float v : aFloat) {
+                        total += v;
+                        amountofNumbers++;
+                    }
+                }
+            }
+            return total/(float) amountofNumbers;
         }
-        return items;
+        return 0;
     }
 }
+
