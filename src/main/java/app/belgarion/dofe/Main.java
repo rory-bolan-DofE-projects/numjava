@@ -11,43 +11,36 @@ public class Main {
         NumJavaArray test = NumJavaArray.createArray(new float[]{1,2,3,4,5,6});
         System.out.println("---------");
         System.out.println("1 dimensional array");
-        System.out.println("ndim: " + test.ndim);
-        System.out.println("array: " + test);
-        System.out.println("reversed: " + test.reversed());
-        System.out.println("get(0): " + test.get(0));
-        System.out.println("average: " + test.average());
-        System.out.println("shape: " + Arrays.toString(test.shape));
-        System.out.println("size: " + test.size);
+        printDetails(test);
         NumJavaArray test2 = NumJavaArray.createArray(new float[][]{new float[]{1,2}, new float[]{3,4}});
         System.out.println("---------");
         System.out.println("2 dimensional array");
-        System.out.println("ndim: " + test2.ndim);
-        System.out.println("array: " + test2);
-        System.out.println("reversed: " + test2.reversed());
-        System.out.println("get(0,0): " + test2.get(0,0));
-        System.out.println("average: " + test2.average());
-        System.out.println("shape: " + Arrays.toString(test2.shape));
-        System.out.println("size: " + test2.size);
+        printDetails(test2);
         float[][][] array3d = getArray3d();
 
         NumJavaArray test3 = NumJavaArray.createArray(array3d);
 
         System.out.println("---------");
         System.out.println("3 dimensional array");
-        System.out.println("array: " + test3);
-        System.out.println("ndim: " + test3.ndim);
-        System.out.println("reversed: " + test3.reversed());
-        System.out.println("get(0,0,0): " + test3.get(0,0,0));
-        System.out.println("average: " + test3.average());
-        System.out.println("shape: " + Arrays.toString(test3.shape));
-        System.out.println("size: " + test3.size);
-        System.out.println("---------");
+        printDetails(test3);
         System.out.println("zeros:");
         NumJavaArray zeros = NumJavaArray.zeros(3,3,3);
-        System.out.println(zeros);
-        System.out.println("shape: "+ Arrays.toString(zeros.shape));
-        System.out.println("size: "+zeros.size);
-        System.out.println("average: "+zeros.average());
+        printDetails(zeros);
+        NumJavaArray ones = NumJavaArray.ones(3,4,5);
+        printDetails(ones);
+        NumJavaArray range1d = NumJavaArray.arange(9);
+        printDetails(range1d);
+        NumJavaArray range2d = NumJavaArray.arange(3,3);
+        printDetails(range2d);
+    }
+
+    private static void printDetails(NumJavaArray range1d) {
+        System.out.println(range1d);
+        System.out.println("shape: "+ Arrays.toString(range1d.shape));
+        System.out.println("size: "+range1d.size);
+        System.out.println("ndim: " + range1d.ndim);
+        System.out.println("average: "+range1d.average());
+        System.out.println("---------");
     }
 
     private static float[][][] getArray3d() {

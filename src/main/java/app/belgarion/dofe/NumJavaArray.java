@@ -1,6 +1,7 @@
 package app.belgarion.dofe;
 
 import java.util.Arrays;
+import java.util.stream.IntStream;
 
 public class NumJavaArray {
     public int ndim;
@@ -88,6 +89,55 @@ public class NumJavaArray {
             }
             return new NumJavaArray(items);
         }
+    }
+    public static NumJavaArray ones(int... params) {
+        if (params.length == 1) {
+            float[] items = new float[params[0]];
+            for (int i = 0; i < params[0]; i++) {
+                items[i] = 1;
+            }
+            return new NumJavaArray(items);
+        } else if (params.length == 2) {
+            float[][] items = new float[params[0]][params[1]];
+            for (int i = 0; i < params[0]; i++) {
+                for (int j = 0; j < params[1]; j++) {
+                    items[i][j] = 1;
+                }
+            }
+            return new NumJavaArray(items);
+        } else {
+            float[][][] items = new float[params[0]][params[1]][params[2]];
+            for (int i = 0; i < params[0]; i++) {
+                for (int j = 0; j < params[1]; j++) {
+                    for (int k = 0; k < params[2]; k++) {
+                        items[i][j][k] = 1;
+                    }
+                }
+            }
+            return new NumJavaArray(items);
+        }
+    }
+    public static NumJavaArray arange(int... params) {
+        if (params.length == 1) {
+            IntStream items = IntStream.range(0, params[0]);
+
+            int[] og = items.toArray();
+            float[] itemsArray = new float[og.length];
+            for (int i = 0; i < itemsArray.length; i++) {
+                itemsArray[i] = (float) og[i];
+            }
+            return new NumJavaArray(itemsArray);
+
+        } else if (params.length == 2) {
+            // User will submit 2 items, length and width of matrix, for instance 3,3 returns [[1,2,3],[4,5,6],[7,8,9]]
+            int[] items = IntStream.range(0, params[0]*params[1]).toArray();
+            float[][] finalArray = new float[params[0]][params[1]];
+            for(int i=0; i<params[0];i++)
+                for(int j=0;j<params[1];j++)
+                    finalArray[i][j] = (float) items[(j*params[0]) + i];
+            return new NumJavaArray(finalArray);
+        }
+        return null;
     }
     public String toString() {
         return switch (ndim) {
