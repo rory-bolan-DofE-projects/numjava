@@ -56,6 +56,22 @@ public class Main {
         System.out.println("average: "+array.average());
         System.out.println("reversed: "+array.reversed());
         System.out.println("sorted: "+array.sort());
+        System.out.println("\nget/set methods");
+        switch (array.ndim) {
+            case 1:
+
+                System.out.println(array.get(0));
+                System.out.println(array.get(new int[]{0}, new int[]{2}));
+                array.set(5, 1);
+                System.out.println(array);
+                break;
+            case 2:
+                System.out.println(array.get(0,0));
+                System.out.println(array.get(new int[]{0,0}, new int[]{1,1}));
+                array.set(new float[]{1,2}, new NumJavaArray.Point2D(0,0), new NumJavaArray.Point2D(0,1));
+                System.out.println(array);
+                break;
+        }
         System.out.println("---------");
     }
 

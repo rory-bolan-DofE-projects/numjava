@@ -1,8 +1,8 @@
 package app.belgarion.dofe;
 
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Random;
+
+
+import java.util.*;
 import java.util.stream.IntStream;
 
 public class NumJavaArray {
@@ -328,17 +328,87 @@ public class NumJavaArray {
             return new NumJavaArray(new float[]{array3D[x][y][z]});
         } else return null;
     }
-    public NumJavaArray get(int lowerbound, int upperbound) {
+    public NumJavaArray get(int[] lowerbound, int[] upperbound) {
 
         if (ndim == 1) {
-            float[] to_be_returned = new float[upperbound-lowerbound];
-            if (upperbound + 1 - lowerbound >= 0)
-                System.arraycopy(array1D, lowerbound, to_be_returned, 0, upperbound + 1 - lowerbound);
+            if (lowerbound.length > 1 || upperbound.length > 1)
+                throw new IllegalArgumentException("Incorrect parameter lengths");
+
+            float[] to_be_returned = new float[upperbound[0] - lowerbound[0] + 1]; // <-- +1 for inclusive
+            System.arraycopy(array1D, lowerbound[0], to_be_returned, 0, upperbound[0] - lowerbound[0] + 1);
+
             return new NumJavaArray(to_be_returned);
+        } else if (ndim == 2) {
+            ArrayList<Float> finalArray = getFinalArray(lowerbound, upperbound);
+            float[] arr = new float[finalArray.size()];
+            for (int i = 0; i < finalArray.size(); i++) {
+                arr[i] = finalArray.get(i);
+            }
+            return new NumJavaArray(arr);
         }
         return null;
     }
 
+    private ArrayList<Float> getFinalArray(int[] lower, int[] upper) {
+
+        int minX = Math.min(lower[0], upper[0]);
+        int maxX = Math.max(lower[0], upper[0]);
+        int minY = Math.min(lower[1], upper[1]);
+        int maxY = Math.max(lower[1], upper[1]);
+
+        ArrayList<Float> finalArray = new ArrayList<>();
+
+        for (int y = minY; y <= maxY; y++) {
+            for (int x = minX; x <= maxX; x++) {
+                finalArray.add(array2D[y][x]);
+            }
+        }
+
+        return finalArray;
+    }
+
+    public void set(float value, int... indices) {
+        if (ndim != indices.length) throw new IllegalArgumentException("incorrect number of indices");
+        if (ndim == 1) {
+            array1D[indices[0]] = value;
+        } else if (ndim == 2) {
+            array2D[indices[0]][indices[1]] = value;
+        } else {
+            array3D[indices[0]][indices[1]][indices[2]] = value;
+        }
+    }
+    public void set(float value, int index) {
+        if (array1D != null) {
+            array1D[index] = value;
+        } else if (array2D != null) {
+           array2D[index/array2D.length][index%array2D.length] = value;
+        } else if (array3D!=null) {
+            int x = index / (array3D[0].length * array3D[0][0].length );
+            int y = (index / array3D[0][0].length ) % array3D[0].length;
+            int z = index % array3D[0][0].length;
+            array3D[x][y][z] = value;
+        }
+    }
+    public void set(float[] values, Point2D lowerbound, Point2D upperbound) {
+        if (ndim != 2) throw new IllegalArgumentException("Only use Point2D for matrices");
+        int width = upperbound.x() - lowerbound.x() + 1;
+        int height = upperbound.y() - lowerbound.y() + 1;
+
+        int total = width * height;
+
+        if (values.length != total) {
+            throw new IllegalArgumentException(
+                    "Expected " + total + " values, got " + values.length
+            );
+        }
+
+        int k = 0;
+        for (int i = lowerbound.x(); i <= upperbound.x(); i++) {
+            for (int j = lowerbound.y(); j <= upperbound.y(); j++) {
+                array2D[i][j] = values[k++];
+            }
+        }
+    }
 
     public float average() {
         float total = 0;
@@ -386,5 +456,7 @@ public class NumJavaArray {
     public static class NotImplementedException extends Exception {
         private NotImplementedException(String message) {super(message);}
     }
+    public record Point3D(int x, int y, int z) {}
+    public record Point2D(int x, int y) {}
 }
 

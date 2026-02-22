@@ -3,7 +3,7 @@
 
 # Log file
 *.log
-
+*test*
 # BlueJ files
 *.ctxt
 
@@ -24,3 +24,5 @@ hs_err_pid*
 replay_pid*
 .idea/
 
+*.xml
+*.iml
